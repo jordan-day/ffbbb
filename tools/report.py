@@ -54,6 +54,17 @@ def main():
     for pid in ours["players"]:
         tag = "S" if pid in ours["starters"] else ("IR" if pid in (ours.get("reserve") or []) else "")
         print(line(pid, tag))
+    matchups = get(f"https://api.sleeper.app/v1/league/{LEAGUE}/matchups/{week}", "matchups.json")
+    me = next((m for m in matchups if m["roster_id"] == OUR_ROSTER_ID), None)
+    if me:
+        opp = next((m for m in matchups if m["matchup_id"] == me["matchup_id"] and m is not me), None)
+        pts = sorted(m["points"] or 0 for m in matchups)
+        median = (pts[len(pts) // 2 - 1] + pts[len(pts) // 2]) / 2
+        print(f"\nMatchup wk{week}: us {me['points']} vs roster {opp and opp['roster_id']} {opp and opp['points']}; league median {median}")
+        print("Current slot scores (locked game, or latest game if unlocked):")
+        for pid, p in zip(me["starters"], me.get("starters_points") or []):
+            print(f"   {players.get(pid, {}).get('full_name', pid):22} {p}")
+
     print("\nTop free agents (>=3 games)")
     fa = [p for p in avg if p not in owned and players.get(p, {}).get("team") and avg[p][0] >= 3]
     for pid in sorted(fa, key=lambda p: -avg[p][1])[:25]:

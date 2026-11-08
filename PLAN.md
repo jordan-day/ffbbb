@@ -70,15 +70,14 @@ Our top 9 average about **213 fantasy points/week**, which is 5th of 10 (the bes
 
 Data sources: Sleeper's public API (rosters, matchups, stats, per-game projections, injury tags) via `tools/report.py`, plus web news for injury timelines.
 
-## 5. How I'll actually make the moves
+## 5. How moves get made (advisory mode)
 
-Sleeper's public API is **read-only**. It can't set lineups, lock players or add/drop. All moves go through the Sleeper website (sleeper.com) with browser automation (Playwright, already installed here). What's needed:
+You make every move yourself in the Sleeper app. I don't log in or change anything.
 
-1. **A logged-in Sleeper session.** Sleeper logs in by email/phone with a one-time verification code (or password). I need you to sign me in once. I'll ask in a way that never puts your password in the chat, and I'll keep the session cookie only in this session. If the session expires, I'll ask you again.
-2. **Scheduled check-ins.** I'll set up recurring scheduled tasks in this session (pre-game and post-game, daily) so the routine above runs without you. This cloud session can't stay running forever. If the container gets reclaimed, the next check-in starts fresh and may need you to log in again.
-3. **Network access.** I created a personal cloud environment, "ffbbb", that allows Sleeper's API and website. News sites (RotoWire, Sleeper support) are still blocked, but web search works for injury news.
+Every morning a scheduled task runs `tools/report.py` (Sleeper's public, read-only API), checks injury news, and sends you a short list of moves for the day:
+- **Lineup:** who to swap into which slot so every unlocked slot has a player with a game today.
+- **Locks:** which slot scores to lock now, using the rules in section 2. The public API shows each slot's current score but not whether it's already locked, so lock suggestions say "if not already locked".
+- **Roster:** adds, drops, IR moves and FAAB bids, within the budget rules in section 4.
+- **Trades:** ideas only. You decide.
 
-## 6. What I need from you
-- **Approve a one-time Sleeper login** (next step).
-- **OK the scheduled daily check-ins.**
-- Optional: your preferences. For example, any players you want to keep no matter what, and whether you're fine with me spending FAAB on my own within the limits above.
+Weekly review (Mondays) is folded into that morning's report.
